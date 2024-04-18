@@ -1,39 +1,49 @@
-import React, { useEffect, useState } from "react";
+"use client";
 
-const MealIdeas = ({ ingredient }) => {
-  const [meals, setMeals] = useState([]);
+import { useState, useEffect } from "react";
 
-  const fetchMealIdeas = async (ingredient) => {
-    const apiUrl = `https://www.themealdb.com/api/json/v1/1/filter.php?i=${ingredient}`;
-    try {
-      const response = await fetch(apiUrl);
-      const data = await response.json();
-      const mealsList = data.meals || [];
-      setMeals(mealsList);
-    } catch (error) {
-      console.error('Error fetching meal ideas:', error);
+export default function MealIdeas({ingredient}) 
+{
+    const [meals, setMeals] = useState([]);
+
+    const loadMealIdeas = async () => {
+        const response = await fetchMealIdeas(ingredient);
+        setMeals(response.meals);
     }
-  };
 
-  useEffect(() => {
-    if (ingredient) {
-      fetchMealIdeas(ingredient);
+    useEffect(() => {
+        loadMealIdeas();
+    }, [ingredient]);
+
+    if (!ingredient) {
+        return (
+            <div>
+                <h2 className="text-white font-bold pl-4 text-2xl">Meal Ideas</h2>
+                <p className="text-white pl-4">Select an item to see meal ideas</p>
+            </div>
+        )
+    } else if (meals && meals.length) { 
+        return (
+            <div className="pl-4">
+                <h2 className="text-white font-bold text-2xl">Meal Ideas</h2>
+                <p className="text-white">Here are some meal ideas using {ingredient}:</p>
+                <ul className="text-white">
+                    {meals.map((meal) => (
+                        <li className="p-4 m-2 bg-blue-950 max-w-sm hover:bg-blue-700" key={meal.idMeal}>{meal.strMeal}</li>
+                    ))}
+                </ul>
+            </div>
+        )
+    } else {
+        return (
+            <div>
+                <h2 className="text-white font-bold pl-4 text-2xl">Meal Ideas</h2>
+                <p className="text-white pl-4">No meal ideas found for {ingredient}</p>
+            </div>
+        )
     }
-  }, [ingredient]);
-
-  return (
-    <div>
-      <h2 style={{ textAlign: "center" }}>Meal Ideas:</h2>
-      <ul style={{ display: 'flex', listStyle: "none", justifyContent: "center", alignItems: "center", flexWrap: "wrap" }}>
-        {meals.map((meal) => (
-          <li key={meal.idMeal} style={{ margin: "10px", textAlign: "center" }}>
-            <img src={meal.strMealThumb} alt={meal.strMeal} style={{ width: "250px", height: "250px", objectFit: "cover", borderRadius: "8px", }} />
-            <p style={{ marginTop: "10px", textAlign: 'center' }}>{meal.strMeal}</p>
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-};
-
-export default MealIdeas;
+}
+const fetchMealIdeas = (ingredient) => {
+    return fetch(`https://www.themealdb.com/api/json/v1/1/filter.php?i=${ingredient}`)
+        .then(response => response.json());
+}

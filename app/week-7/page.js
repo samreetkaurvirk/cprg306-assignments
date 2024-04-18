@@ -1,41 +1,38 @@
-import React, { useState, useEffect } from "react";
-import ItemList from './item-list';
-import NewItem from "./new-item";
-import MealIdeas from "./meal-ideas";
+"use client";
+
+import ItemList from './item-list.js';
+import NewItem from "./new-item"
+import itemsData from "./items.json"; 
+import MealIdeas from './meal-ideas.js';
+import { useState } from "react";
 
 export default function Page() {
-  const [items, setItems] = useState([]);
-  const [selectedItem, setSelectedItem] = useState(null);
+    const [items, setItems] = useState(itemsData);
+    const [selectedItemName, setSelectedItemName] = useState('');
 
-  useEffect(() => {
-    try {
-      const data = require('./items.json');
-      setItems(data);
-    } catch (error) {
-      console.error('Error loading JSON:', error);
-    }
-  }, []);
+    function handleItemSelect (newItem) {
+        const newItemSplit = newItem.split(',');
+        const newItemNoEmoji = newItemSplit[0].replace(/(\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff])/g, '');
+        const newItemTrimmed = newItemNoEmoji.trim();
+       //console.log(newItemTrimmed);
+        setSelectedItemName(newItemTrimmed);
+    };
 
-  const handleAddItem = (newItem) => {
-    setItems((prevItems) => [newItem, ...prevItems]);
-  };
+    const handleAddItem = (newItem) => {
+        const newItems = [...items, newItem];
+        setItems(newItems);
+    };
 
-  const handleItemSelect = (selectedItem) => {
-    setSelectedItem(selectedItem);
-  };
-
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '20px', backgroundColor: '#006400' }}>
-      <a href='/Home' style={{ color: 'blue', marginBottom: '20px', alignSelf: 'flex-start', marginLeft: '10px' }}>
-        Home
-      </a>
-      <div style={{ padding: '20px', borderRadius: '10px', width: '100%', marginBottom: '20px', boxSizing: 'border-box' }}>
-        <NewItem onAddItem={handleAddItem} />
-      </div>
-      <div style={{ padding: '20px', borderRadius: '10px', width: '100%', boxSizing: 'border-box' }}>
-        <ItemList items={items} onItemSelect={handleItemSelect} />
-      </div>
-      {selectedItem && <MealIdeas ingredient={selectedItem.name} />}
-    </div>
-  );
+    return (
+        <main className = "bg-slate-950">
+            <h1 className='pl-4 pt-4 text-3xl text-white font-extrabold'>Shopping List</h1>
+            <div className="flex">
+                <div className="">
+            <NewItem onAddItem={handleAddItem}/>
+            <ItemList items={items} onItemSelect={handleItemSelect}/>
+            </div>
+            <MealIdeas ingredient={selectedItemName} />
+            </div>
+        </main>
+    )
 }

@@ -1,59 +1,29 @@
-// Import the useUserAuth hook
+"use client";
+
+import Link from 'next/link';
 import { useUserAuth } from "./_utils/auth-context";
  
-export default function Login() {
-    // Access user object and login/logout functions using the useUserAuth hook
-    const { user, gitHubSignIn, firebaseSignOut } = useUserAuth();
-    
-    // Function to handle GitHub sign-in
-    async function handleSignIn() {
-        try {
-            // Perform sign-in using GitHub authentication via Firebase
-            await gitHubSignIn();
-        }
-        catch (error) {
-            console.log(error); // Log any errors encountered during sign-in
-        }
-    }
 
-    // Function to handle sign-out
-    async function handleSignOut() {
-        try {
-            // Perform sign-out from Firebase
-            await firebaseSignOut();
-        }
-        catch (error) {
-            console.log(error); // Log any errors encountered during sign-out
-        }
-    }
+export default function Page() {
 
-    // Render login page content
+  const { user, gitHubSignIn, firebaseSignOut } = useUserAuth();
+
     return (
-        <div className="text-lg">
-            <h1 className="text-4xl font-bold mb-5">Shopping List App</h1>
-            {user ? (
-                <div className="text-lg">
-                    {/* Display user information if logged in */}
-                    <p>
-                        Signed in as {user.displayName} {user.email}
-                    </p>
-                    {/* Button to sign out */}
-                    <button
-                        onClick={handleSignOut}
-                        className="text-lg m-2 hover:underline">
-                        Sign Out
-                    </button>                    
-                    {/* Link to shopping list if logged in */}
-                    <p>
-                        <a className="text-lg hover:underline" href="/week-8/shopping-list">Continue to your Shopping List</a>
-                    </p>
-                </div>
-            ) : (
-                // Button to initiate GitHub sign-in if not logged in
-                <button onClick={handleSignIn} className="text-lg m-2 hover:underline">
-                        Sign in with GitHub
-                </button>
-            )}
+    <main>
+      <div className="pl-4 pt-4 bg-blue-950 h-screen text-white">
+        <h1 className='pb-4 text-3xl font-extrabold'>Shopping List App</h1>
+        {user ? 
+        <div>
+        <p>Welcome, {user.displayName} ({user.email})</p>
+        <Link className='hover:underline' href="week-8/shopping-list">Continue to your Shopping List</Link>
+        <div>
+        <button type="submit" onClick={firebaseSignOut} className="hover:underline">Sign out</button>
         </div>
-      );    
+        </div> :
+        <div>
+        <button type="submit" onClick={gitHubSignIn}   className="hover:underline">Sign in with Github to continue</button>
+        </div>}
+        </div>
+        </main>
+    )
 }

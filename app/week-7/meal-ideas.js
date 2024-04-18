@@ -1,36 +1,49 @@
-import React, { useState, useEffect } from "react";
-import ItemList from './item-list';
-import NewItem from "./new-item";
-import itemsData from "./items.json";
+"use client";
 
-export default function Page() {
-  const [items, setItems] = useState([]);
+import { useState, useEffect } from "react";
 
-  useEffect(() => {
-    try {
-      const data = require('./items.json');
-      setItems(data);
-    } catch (error) {
-      console.error('Error loading JSON:', error);
+export default function MealIdeas({ingredient}) 
+{
+    const [meals, setMeals] = useState([]);
+
+    const loadMealIdeas = async () => {
+        const response = await fetchMealIdeas(ingredient);
+        setMeals(response.meals);
     }
-  }, []);
 
-  const handleAddItem = (newItem) => {
-    setItems((prevItems) => [newItem, ...prevItems]);
-  };
+    useEffect(() => {
+        loadMealIdeas();
+    }, [ingredient]);
 
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '20px', backgroundColor: '#006400' }}>
-      <a href='/Home' style={{ color: 'blue', marginBottom: '20px', alignSelf: 'flex-start', marginLeft: '10px' }}>
-        Home
-      </a>
-      <div style={{ padding: '20px', borderRadius: '10px', width: '100%', marginBottom: '20px', boxSizing: 'border-box' }}>
-        <NewItem onAddItem={handleAddItem} />
-      </div>
-      <div style={{ padding: '20px', borderRadius: '10px', width: '100%', boxSizing: 'border-box' }}>
-        <ItemList items={items} />
-      </div>
-    </div>
-  );
+    if (!ingredient) {
+        return (
+            <div>
+                <h2 className="text-white font-bold pl-4 text-2xl">Meal Ideas</h2>
+                <p className="text-white pl-4">Select an item to see meal ideas</p>
+            </div>
+        )
+    } else if (meals && meals.length) { 
+        return (
+            <div className="pl-4">
+                <h2 className="text-white font-bold text-2xl">Meal Ideas</h2>
+                <p className="text-white">Here are some meal ideas using {ingredient}:</p>
+                <ul className="text-white">
+                    {meals.map((meal) => (
+                        <li className="p-4 m-2 bg-blue-950 max-w-sm hover:bg-blue-700" key={meal.idMeal}>{meal.strMeal}</li>
+                    ))}
+                </ul>
+            </div>
+        )
+    } else {
+        return (
+            <div>
+                <h2 className="text-white font-bold pl-4 text-2xl">Meal Ideas</h2>
+                <p className="text-white pl-4">No meal ideas found for {ingredient}</p>
+            </div>
+        )
+    }
 }
-s
+const fetchMealIdeas = (ingredient) => {
+    return fetch(`https://www.themealdb.com/api/json/v1/1/filter.php?i=${ingredient}`)
+        .then(response => response.json());
+}
